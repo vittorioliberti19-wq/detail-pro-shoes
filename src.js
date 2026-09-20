@@ -104,3 +104,6 @@ diffuseColor.rgb *= mix(vec3(1.0), soilTint, dirtOpacity);`);
 resize();addEventListener('resize',resize);addEventListener('scroll',onScroll,{passive:true});onScroll();
 renderer.setAnimationLoop(()=>{if(document.hidden||!heroVisible)return;current=Math.abs(target-current)<.0005?target:current+(target-current)*.065;if(shoe){const p=reduced.matches?target:current;shoe.rotation.set(.12+Math.sin(p*Math.PI)*.14,-.65+p*1.35,-.28+p*.32);shoe.position.y=Math.sin(p*Math.PI)*.08;materials.forEach(m=>{if(m.userData.shader)m.userData.shader.uniforms.clean.value=THREE.MathUtils.clamp(p,0,1);});}renderer.render(scene,camera);});
 }catch{loading.textContent='La vista 3D no está disponible en este navegador. Puedes explorar nuestros servicios abajo.';}
+
+import {initAccessories} from './accessories.js';
+initAccessories();
