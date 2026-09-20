@@ -17,7 +17,7 @@ function loadCap(){
       model.traverse(o=>{
         if(!o.isMesh)return;
         o.material=new THREE.MeshStandardMaterial({color:0xe8e5dc,roughness:.78,metalness:0});
-        addDirt(o.material,o.geometry);
+        addDirt(o.material,o.geometry,'cap');
       });
       const box=new THREE.Box3().setFromObject(model);
       const size=box.getSize(new THREE.Vector3());
@@ -32,7 +32,7 @@ function loadCap(){
 }
 function mesh(group, geometry, color, options={}) {
   const material=new THREE.MeshStandardMaterial({color,roughness:.72,...options});
-  addDirt(material,geometry);
+  addDirt(material,geometry,'bag');
   const object=new THREE.Mesh(geometry,material);
   group.add(object);
   return object;
