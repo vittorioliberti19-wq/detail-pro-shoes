@@ -10,13 +10,18 @@ const stage=document.querySelector('#shoe-stage');
 const loading=document.querySelector('#loading');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let renderer,shoe;
+// La foto del local solo se pide cuando la sección de contacto se acerca.
+const contact=document.querySelector('.contact');
+new IntersectionObserver((entries,obs)=>{if(entries[0].isIntersecting){contact.classList.add('bg-ready');obs.disconnect();}},{rootMargin:'400px'}).observe(contact);
+let heroVisible=true;
+new IntersectionObserver(([e])=>{heroVisible=e.isIntersecting;},{rootMargin:'120px'}).observe(document.querySelector('.hero'));
 let target=0,current=0;
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(32,1,.01,100);
 camera.position.set(0,.45,4.6);
 const materials=[];
 function resize(){if(!renderer)return;const {width,height}=stage.getBoundingClientRect();renderer.setSize(width,height);camera.aspect=width/height;camera.position.z=camera.aspect<1?7:4.6;camera.lookAt(0,0,0);camera.updateProjectionMatrix();}
-function onScroll(){const story=document.querySelector('.scroll-story');target=THREE.MathUtils.clamp(-story.getBoundingClientRect().top/(story.offsetHeight-innerHeight),0,1);document.querySelector('#progress').style.width=`${target*100}%`;document.querySelector('#percent').textContent=`${Math.round(target*100)}%`;document.querySelector('#phase').textContent=target<.3?'01 — ANTES':target<.8?'02 — EL CUIDADO':'03 — LIMPIO';}
+function onScroll(){const story=document.querySelector('.scroll-story');target=THREE.MathUtils.clamp(-story.getBoundingClientRect().top/Math.max(1,story.offsetHeight-innerHeight),0,1);document.querySelector('#progress').style.width=`${target*100}%`;document.querySelector('#percent').textContent=`${Math.round(target*100)}%`;document.querySelector('#phase').textContent=target<.3?'01 — ANTES':target<.8?'02 — EL CUIDADO':'03 — LIMPIO';}
 try{
 renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
@@ -25,9 +30,7 @@ stage.appendChild(renderer.domElement);
 const environment=new RoomEnvironment();const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(environment,.04).texture;environment.dispose();pmrem.dispose();
 scene.add(new THREE.HemisphereLight(0xffffff,0x444b35,2));
 const light=new THREE.DirectionalLight(0xffeee2,4);light.position.set(2,4,4);scene.add(light);
-new GLTFLoader().load('/assets/sneaker.glb',async gltf=>{
-const lightMaterial=await gltf.parser.getDependency('material',1);
-gltf.scene.traverse(mesh=>{if(mesh.isMesh)mesh.material=lightMaterial;});
+new GLTFLoader().load('/assets/sneaker.glb',gltf=>{
 shoe=gltf.scene;const box=new THREE.Box3().setFromObject(shoe);const center=box.getCenter(new THREE.Vector3());const size=box.getSize(new THREE.Vector3());shoe.position.sub(center);const holder=new THREE.Group();holder.add(shoe);holder.scale.setScalar(2.75/Math.max(size.x,size.y,size.z));shoe=holder;scene.add(shoe);
 shoe.traverse(mesh=>{
 if(!mesh.isMesh)return;
@@ -99,5 +102,5 @@ diffuseColor.rgb *= mix(vec3(1.0), soilTint, dirtOpacity);`);
 });loading.remove();resize();
 },undefined,()=>{loading.textContent='No se pudo cargar el sneaker 3D. Recarga para intentarlo de nuevo.';});
 resize();addEventListener('resize',resize);addEventListener('scroll',onScroll,{passive:true});onScroll();
-renderer.setAnimationLoop(()=>{if(document.hidden)return;current=Math.abs(target-current)<.0005?target:current+(target-current)*.065;if(shoe){const p=reduced.matches?1:current;shoe.rotation.set(.12+Math.sin(p*Math.PI)*.14,-.65+p*1.35,-.28+p*.32);shoe.position.y=Math.sin(p*Math.PI)*.08;materials.forEach(m=>{if(m.userData.shader)m.userData.shader.uniforms.clean.value=THREE.MathUtils.clamp(p,0,1);});}renderer.render(scene,camera);});
+renderer.setAnimationLoop(()=>{if(document.hidden||!heroVisible)return;current=Math.abs(target-current)<.0005?target:current+(target-current)*.065;if(shoe){const p=reduced.matches?target:current;shoe.rotation.set(.12+Math.sin(p*Math.PI)*.14,-.65+p*1.35,-.28+p*.32);shoe.position.y=Math.sin(p*Math.PI)*.08;materials.forEach(m=>{if(m.userData.shader)m.userData.shader.uniforms.clean.value=THREE.MathUtils.clamp(p,0,1);});}renderer.render(scene,camera);});
 }catch{loading.textContent='La vista 3D no está disponible en este navegador. Puedes explorar nuestros servicios abajo.';}

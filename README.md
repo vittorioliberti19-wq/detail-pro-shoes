@@ -4,6 +4,6 @@ Logo copiado de public/logos/detailshoes.png del ERP, sin modificarlo.
 Modelo: Materials Variants Shoe © 2021 Shopify, CC BY 4.0.
 https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/MaterialsVariantsShoe
 https://creativecommons.org/licenses/by/4.0/
-Adaptaciones: giro vinculado al scroll y suciedad procedural ilustrativa; no prueba resultados reales.
+Adaptaciones: giro vinculado al scroll y suciedad procedural ilustrativa; no prueba resultados reales. El GLB se reconstruyó conservando solo la variante que el sitio usa: texturas reducidas a 1024 px y extensión KHR_materials_variants eliminada (7,8 MB a 1,1 MB).
 Fuentes locales: Barlow Condensed y DM Sans, paquetes @fontsource (OFL).
 Pendientes de lanzamiento: confirmar catálogo, contacto, dirección, logo definitivo y dominio. Sin precios ni testimonios inventados. No reservas activas, analítica ni formularios. No desplegado.
