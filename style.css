@@ -39,3 +39,31 @@ body{overflow-x:clip}
 .accessory-word{transform:translateY(-26%)}
 .accessory-word-two{transform:translateY(-34%)}
 @media(max-width:700px){.accessory-word{transform:translateY(-22%)}.accessory-word-two{transform:translateY(-36%)}}
+/* Menu mas legible y boton de contacto en blanco. */
+header nav{font-size:15px;gap:24px}
+header .nav-cta{color:#fff;font-weight:600;font-size:14px;padding:13px 22px}
+header .nav-cta:hover{color:#fff}
+@media(max-width:1300px){header nav{font-size:14px;gap:18px}}
+@media(max-width:1100px){header nav{font-size:13px;gap:14px}}
+@media(max-width:900px){header nav a,header nav a:not(.nav-cta){font-size:16px;padding:14px 12px}}
+/* Boton flotante de WhatsApp: redondo, como el de 1bite, con el naranja de Detail Pro. */
+.whatsapp-float{width:60px;height:60px;padding:0;gap:0;justify-content:center;border-radius:50%;border:1px solid #ffffff40;background:var(--orange);color:#fff;box-shadow:0 8px 28px #f0522355;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.whatsapp-float:hover{background:var(--orange);filter:brightness(1.12)}
+.whatsapp-float svg{display:block}
+/* Marca de productos en el hero. */
+.hero-brand{display:inline-flex;align-items:center;gap:14px;margin-top:26px}
+.hero-brand span{font-size:9px;letter-spacing:1.8px;color:var(--muted)}
+.hero-brand img{width:44px;height:44px;background:#fff;padding:5px;border-radius:3px}
+.hero-brand:hover span{color:#f4f2ed}
+@media(max-width:700px){
+  .nav-cta{font-size:13px;padding:11px 16px}
+  .whatsapp-float{width:54px;height:54px;right:16px;bottom:16px}
+  .whatsapp-float svg{width:26px;height:26px}
+  .hero-brand{margin-top:16px;gap:10px}
+  .hero-brand img{width:36px;height:36px}
+  .hero-brand span{font-size:8px}
+}
+/* Sin flecha, el boton ya no necesita el hueco que la separaba. */
+.button{gap:0;width:fit-content}
+.hero-copy .button{display:flex}
+.hero-brand{display:flex;width:fit-content}
