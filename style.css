@@ -11,3 +11,6 @@ header{position:fixed;top:0;left:0;background:rgba(23,24,22,.94);backdrop-filter
 .faq details{padding:19px 0}
 @media(max-width:700px){h1{font-size:clamp(56px,13.2vw,105px)}.hero-title{right:4.5%}h1 em{display:inline-block;max-width:100%}}
 #loading{margin:0;z-index:4;pointer-events:none}
+
+/* Agency credit follows the shared Detail Pro footer pattern. */
+footer{flex-wrap:wrap}footer>details{margin-left:auto}.footer-bottom{flex-basis:100%;border-top:1px solid #ffffff20;padding-top:24px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}.developed-by{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.05em}.developed-by a{display:inline-flex;align-items:center;line-height:0}.developed-by img{height:16px;width:auto;filter:invert(1);opacity:.9;transition:opacity .2s}.developed-by a:hover img{opacity:1}@media(max-width:700px){.footer-bottom{padding-bottom:48px;gap:20px}}
