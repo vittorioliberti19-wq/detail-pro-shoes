@@ -24,3 +24,14 @@ header{gap:24px}header> a{flex-shrink:0}header nav{gap:17px;font-size:11px}heade
 .accessories{display:block}.accessories>.care-detail{max-width:none;width:100%;margin-top:50px}.accessories>.care-detail>p{max-width:760px}
 
 .accessory-sticky{color:#f4f2ed}.accessory-status>span{color:inherit}.accessory-status>.accessory-phase{color:#ff7448}
+/* Las escenas de accesorios ocupan todo el ancho y llevan la palabra del servicio detrás del modelo. */
+body{overflow-x:clip}
+.accessory-story{width:100vw;max-width:100vw;margin-inline:calc(50% - 50vw)}
+.accessory-sticky{border-left:0;border-right:0;border-radius:0}
+.accessory-kicker,.accessory-status{padding-inline:4.5%}
+.accessory-sticky>small{padding-inline:4.5%;padding-bottom:22px;display:block}
+.accessory-stage{isolation:isolate}
+.accessory-word{position:absolute;inset:0;z-index:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--orange);font-size:clamp(76px,13.5vw,210px);line-height:.86;letter-spacing:-.025em;text-transform:uppercase;pointer-events:none;user-select:none}
+.accessory-word-two{font-size:clamp(58px,10.5vw,165px)}
+.accessory-stage canvas{position:relative;z-index:1}
+@media(max-width:700px){.accessory-word{font-size:clamp(52px,16vw,96px)}.accessory-word-two{font-size:clamp(40px,12.5vw,74px)}}
