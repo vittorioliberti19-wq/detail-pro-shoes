@@ -15,30 +15,62 @@ function seam(group,points,color=0xc9c5b9,radius=.008){
 }
 function cap(){
   const group=new THREE.Group();
-  const crown=mesh(group,new THREE.SphereGeometry(1,64,32,0,Math.PI*2,0,Math.PI/2),0xe7e4da,{side:THREE.DoubleSide});
-  crown.scale.set(1,.83,1.02);
-  const band=mesh(group,new THREE.CylinderGeometry(.995,.995,.08,64,1,true),0xd1cec2,{side:THREE.DoubleSide});
-  band.position.y=.025;
+  // A fitted six-panel sports cap: tapered oval crown and a bent, narrow bill.
+  const profile=(t,a,offset=0)=>{
+    const r=Math.pow(Math.sin(t),.78);
+    return new THREE.Vector3((.82+offset)*r*Math.cos(a),.73*Math.cos(t)+offset,(1.0+offset)*r*Math.sin(a)-.08*Math.cos(t));
+  };
+  const geometry=new THREE.SphereGeometry(1,72,36,0,Math.PI*2,0,Math.PI/2);
+  const positions=geometry.attributes.position;
+  for(let i=0;i<positions.count;i++){
+    const t=Math.acos(THREE.MathUtils.clamp(positions.getY(i),0,1));
+    const a=Math.atan2(positions.getZ(i),positions.getX(i));
+    const v=profile(t,a);positions.setXYZ(i,v.x,v.y,v.z);
+  }
+  // Open arch at the back, as on an adjustable sports cap.
+  const original=geometry.index.array,indices=[];
+  for(let i=0;i<original.length;i+=3){
+    const ids=[original[i],original[i+1],original[i+2]];
+    const x=ids.reduce((n,j)=>n+positions.getX(j),0)/3;
+    const y=ids.reduce((n,j)=>n+positions.getY(j),0)/3;
+    const z=ids.reduce((n,j)=>n+positions.getZ(j),0)/3;
+    if(z<-.78 && (x/.30)**2+(y/.28)**2<1)continue;
+    indices.push(...ids);
+  }
+  geometry.setIndex(indices);geometry.computeVertexNormals();
+  mesh(group,geometry,0xe4e5e2,{side:THREE.DoubleSide,roughness:.94});
+  const hem=[];for(let i=0;i<=100;i++){const a=-Math.PI/2+.37+i/100*(Math.PI*2-.74);hem.push(profile(Math.PI/2,a,.005));}
+  seam(group,hem,0xc6c8c2,.022);
+  const arch=[];for(let i=0;i<=36;i++){const a=Math.PI*i/36;const x=.30*Math.cos(a);arch.push(new THREE.Vector3(x,.28*Math.sin(a),-Math.sqrt(1-(x/.82)**2)-.008));}
+  seam(group,arch,0xd2d4ce,.012);
+  const strap=mesh(group,new THREE.BoxGeometry(.53,.075,.035),0xc8cbc3);strap.position.set(.035,.025,-1.012);
+  const buckle=mesh(group,new THREE.BoxGeometry(.085,.09,.045),0x666b66,{metalness:.7,roughness:.4});buckle.position.set(.18,.025,-1.036);
   const visor=new THREE.Shape();
-  visor.moveTo(-.88,.26);visor.bezierCurveTo(-1.12,.85,-.94,1.85,0,1.94);
-  visor.bezierCurveTo(.94,1.85,1.12,.85,.88,.26);visor.quadraticCurveTo(0,.62,-.88,.26);
-  const brim=mesh(group,new THREE.ExtrudeGeometry(visor,{depth:.045,bevelEnabled:true,bevelSize:.025,bevelThickness:.018,bevelSegments:3,steps:1,curveSegments:32}),0xe5e2d8);
-  brim.rotation.x=Math.PI/2;brim.position.y=.015;
-  // Concentric stitch rows on the visor, and six tailored crown panels.
-  for(let row=0;row<4;row++){
-    const pts=[];for(let i=0;i<=50;i++){const a=Math.PI*i/50;pts.push(new THREE.Vector3(Math.cos(a)*(.84-row*.075),.048,.60+Math.sin(a)*(1.22-row*.09)));}
-    seam(group,pts,0xc8c4b8,.004);
+  visor.moveTo(-.73,.42);visor.bezierCurveTo(-.86,.89,-.78,1.64,-.48,1.77);
+  visor.quadraticCurveTo(0,1.95,.48,1.77);visor.bezierCurveTo(.78,1.64,.86,.89,.73,.42);
+  visor.quadraticCurveTo(0,.86,-.73,.42);
+  const brimGeometry=new THREE.ExtrudeGeometry(visor,{depth:.026,bevelEnabled:true,bevelSize:.012,bevelThickness:.008,bevelSegments:3,steps:1,curveSegments:36});
+  const bend=(x,z)=>{const join=Math.sqrt(Math.max(0,1-(x/.82)**2));const extension=Math.max(0,z-join);return .005-(.23*(x/.82)**2+.10)*extension;};
+  const bp=brimGeometry.attributes.position;
+  for(let i=0;i<bp.count;i++){const x=bp.getX(i),z=bp.getY(i),depth=bp.getZ(i);bp.setXYZ(i,x,bend(x,z)-depth,z);}
+  brimGeometry.computeVertexNormals();mesh(group,brimGeometry,0xe3e5e1,{roughness:.95});
+  // Fine tonal stitching follows the bend rather than floating above the brim.
+  for(let row=0;row<3;row++){
+    const pts=[];for(let i=0;i<=60;i++){const a=Math.PI*i/60,x=Math.cos(a)*(.72-row*.06),z=.78+Math.sin(a)*(1.05-row*.075);pts.push(new THREE.Vector3(x,bend(x,z)+.004,z));}
+    seam(group,pts,0xcdd0c8,.0025);
   }
   for(let i=0;i<6;i++){
-    const a=i*Math.PI/3;const pts=[];
-    for(let j=0;j<=28;j++){const t=j/28*Math.PI/2;pts.push(new THREE.Vector3(Math.sin(t)*Math.cos(a)*1.006,Math.cos(t)*.837,Math.sin(t)*Math.sin(a)*1.027));}
-    seam(group,pts);
-    const eye=mesh(group,new THREE.TorusGeometry(.033,.009,8,16),0xbcb8ad);
-    eye.position.set(Math.cos(a)*.88,.40,Math.sin(a)*.90);eye.lookAt(eye.position.clone().multiplyScalar(2));
+    const a=Math.PI/6+i*Math.PI/3,pts=[];
+    for(let j=0;j<=36;j++)pts.push(profile(j/36*Math.PI/2,a,.005));
+    seam(group,pts,0xcfd1cb,.004);
+    const v=profile(1.02,a,.012);
+    const eye=mesh(group,new THREE.TorusGeometry(.018,.005,6,14),0xb5b9b0);
+    eye.position.copy(v);eye.lookAt(v.clone().add(new THREE.Vector3(Math.cos(a),.4,Math.sin(a))));
   }
-  const button=mesh(group,new THREE.SphereGeometry(.075,20,12),0xdfdccf);button.position.y=.84;button.scale.y=.45;
-  const badge=mesh(group,new THREE.BoxGeometry(.27,.15,.024),0xf05223);badge.position.set(0,.40,.905);badge.rotation.x=-.43;
-  group.position.set(0,-.30,-.35);group.rotation.x=.12;
+  const button=mesh(group,new THREE.SphereGeometry(.048,20,12),0xd7dad3);button.position.set(0,.735,-.08);button.scale.y=.4;
+  // Small unbranded orange embroidery, not a rigid rectangular badge.
+  seam(group,[new THREE.Vector3(-.10,.32,.894),new THREE.Vector3(.01,.35,.88),new THREE.Vector3(.10,.40,.854)],0xf05223,.014);
+  group.position.set(0,-.25,-.30);group.rotation.x=.08;
   return group;
 }
 function bag(){
