@@ -51,12 +51,14 @@ function cap(){
   visor.quadraticCurveTo(0,.86,-.73,.42);
   const brimGeometry=new THREE.ExtrudeGeometry(visor,{depth:.026,bevelEnabled:true,bevelSize:.012,bevelThickness:.008,bevelSegments:3,steps:1,curveSegments:36});
   const bend=(x,z)=>{const join=Math.sqrt(Math.max(0,1-(x/.82)**2));const extension=Math.max(0,z-join);return .005-(.23*(x/.82)**2+.10)*extension;};
+  // Compress only the exposed bill, preserving its attachment to the crown.
+  const shortBill=(x,z)=>{const join=Math.sqrt(Math.max(0,1-(x/.82)**2));return z>join?join+(z-join)*.60:z;};
   const bp=brimGeometry.attributes.position;
-  for(let i=0;i<bp.count;i++){const x=bp.getX(i),z=bp.getY(i),depth=bp.getZ(i);bp.setXYZ(i,x,bend(x,z)-depth,z);}
+  for(let i=0;i<bp.count;i++){const x=bp.getX(i),z=shortBill(x,bp.getY(i)),depth=bp.getZ(i);bp.setXYZ(i,x,bend(x,z)-depth,z);}
   brimGeometry.computeVertexNormals();mesh(group,brimGeometry,0xe3e5e1,{roughness:.95});
   // Fine tonal stitching follows the bend rather than floating above the brim.
   for(let row=0;row<3;row++){
-    const pts=[];for(let i=0;i<=60;i++){const a=Math.PI*i/60,x=Math.cos(a)*(.72-row*.06),z=.78+Math.sin(a)*(1.05-row*.075);pts.push(new THREE.Vector3(x,bend(x,z)+.004,z));}
+    const pts=[];for(let i=0;i<=60;i++){const a=Math.PI*i/60,x=Math.cos(a)*(.72-row*.06),z=shortBill(x,.78+Math.sin(a)*(1.05-row*.075));pts.push(new THREE.Vector3(x,bend(x,z)+.004,z));}
     seam(group,pts,0xcdd0c8,.0025);
   }
   for(let i=0;i<6;i++){
