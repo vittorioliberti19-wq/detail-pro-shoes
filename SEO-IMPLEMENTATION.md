@@ -46,3 +46,5 @@ Auditoría con navegador en 360/390/768/1024/1440. Resultado previo: 1 alto, 5 m
 Dirección del schema y de `llms.txt` sincronizadas con el texto visible ("Av. 3F con calle 77 (5 de Julio)"). Se quitó `currenciesAccepted` (dato inventado) y la entrada "Créditos 3D" que se había colado en el `FAQPage`: quedan las 7 preguntas reales.
 
 Verificación tras los cambios: `npm run build` en verde, cero errores de consola en 390 y 1440, progreso 0→100 %, foto del local servida solo tras el scroll y en la variante que corresponde a cada ancho.
+
+Coordenadas añadidas el 20 de septiembre de 2026: `geo` 10.66712, -71.6033406 y `hasMap`, resueltos desde el enlace corto de Google Maps que ya estaba en el botón "Cómo llegar" (ficha "Centro Comercial Terraza 77"). No se inventaron: el centro comercial no figura en OpenStreetMap. Queda pendiente confirmar el punto exacto del local dentro del sótano si más adelante se crea una ficha propia de Google Business.
