@@ -16,7 +16,7 @@ const camera=new THREE.PerspectiveCamera(32,1,.01,100);
 camera.position.set(0,.45,4.6);
 const materials=[];
 function resize(){if(!renderer)return;const {width,height}=stage.getBoundingClientRect();renderer.setSize(width,height);camera.aspect=width/height;camera.position.z=camera.aspect<1?7:4.6;camera.lookAt(0,0,0);camera.updateProjectionMatrix();}
-function onScroll(){const story=document.querySelector('.scroll-story');target=THREE.MathUtils.clamp(-story.getBoundingClientRect().top/(story.offsetHeight-innerHeight),0,1);document.querySelector('#progress').style.width=`${target*100}%`;document.querySelector('#percent').textContent=`${Math.round(target*100)}%`;document.querySelector('#phase').textContent=target<.3?'01 — ANTES':target<.8?'02 — EL CUIDADO':'03 — COMO NUEVOS';}
+function onScroll(){const story=document.querySelector('.scroll-story');target=THREE.MathUtils.clamp(-story.getBoundingClientRect().top/(story.offsetHeight-innerHeight),0,1);document.querySelector('#progress').style.width=`${target*100}%`;document.querySelector('#percent').textContent=`${Math.round(target*100)}%`;document.querySelector('#phase').textContent=target<.3?'01 — ANTES':target<.8?'02 — EL CUIDADO':'03 — LIMPIO';}
 try{
 renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
@@ -33,18 +33,25 @@ shoe.traverse(mesh=>{
 if(!mesh.isMesh)return;
 mesh.material=mesh.material.clone();
 const mat=mesh.material;
+// Shader positions are in this mesh's local geometry space. Normalize against
+// its own bbox so GLTF scene transforms cannot shift the dirt pattern.
+mesh.geometry.computeBoundingBox();
+const localBox=mesh.geometry.boundingBox;
+const dirtMin=localBox.min.clone();
+const dirtSize=localBox.getSize(new THREE.Vector3());
+dirtSize.set(Math.max(dirtSize.x,1e-5),Math.max(dirtSize.y,1e-5),Math.max(dirtSize.z,1e-5));
 materials.push(mat);
 mat.onBeforeCompile=shader=>{
 shader.uniforms.clean={value:0};
-shader.uniforms.dirtOrigin={value:center};
-shader.uniforms.dirtScale={value:1/Math.max(size.x,size.y,size.z)};
+shader.uniforms.dirtMin={value:dirtMin};
+shader.uniforms.dirtSize={value:dirtSize};
 mat.userData.shader=shader;
 // Object-space noise stays continuous across UV islands and follows the shoe.
 shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
-uniform vec3 dirtOrigin;
-uniform float dirtScale;
+uniform vec3 dirtMin;
+uniform vec3 dirtSize;
 varying vec3 vDirtPosition;`).replace('#include <begin_vertex>',`#include <begin_vertex>
-vDirtPosition = (position - dirtOrigin) * dirtScale;`);
+vDirtPosition = (position - dirtMin) / dirtSize - 0.5;`);
 shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
 uniform float clean;
 varying vec3 vDirtPosition;
@@ -78,15 +85,19 @@ float soil = dirtFbm(dirtP + warp * 2.6);
 float lowEdge = 1.0 - smoothstep(-0.16, 0.13, vDirtPosition.y);
 float smudge = smoothstep(0.37, 0.70, soil);
 float dust = smoothstep(0.24, 0.63, soil) * 0.15;
+float film = 0.08 + smoothstep(0.10, 0.90, dirtFbm(dirtP * 0.55 + 31.0)) * 0.16;
 float grain = dirtNoise(vDirtPosition * 190.0);
-float dirtMask = clamp(smudge * (0.48 + lowEdge * 0.45) + dust + lowEdge * grain * 0.07, 0.0, 0.84);
+float dirtMask = clamp(film + smudge * (0.48 + lowEdge * 0.45) + dust + lowEdge * grain * 0.07, 0.0, 0.84);
 float sweep = vDirtPosition.x + 0.5 + (soil - 0.5) * 0.12;
-float reveal = smoothstep(clean - 0.10, clean + 0.10, sweep);
+float sweepRemoval = smoothstep(sweep - 0.10, sweep + 0.10, clean * 1.20 - 0.10);
+float dirtOpacity = dirtMask * (1.0 - sweepRemoval);
+if (clean <= 0.0) dirtOpacity = dirtMask;
+if (clean >= 1.0) dirtOpacity = 0.0;
 vec3 soilTint = mix(vec3(0.35, 0.27, 0.19), vec3(0.53, 0.43, 0.31), soil);
-diffuseColor.rgb *= mix(vec3(1.0), soilTint, dirtMask * reveal);`);
+diffuseColor.rgb *= mix(vec3(1.0), soilTint, dirtOpacity);`);
 };
 });loading.remove();resize();
 },undefined,()=>{loading.textContent='No se pudo cargar el sneaker 3D. Recarga para intentarlo de nuevo.';});
 resize();addEventListener('resize',resize);addEventListener('scroll',onScroll,{passive:true});onScroll();
-renderer.setAnimationLoop(()=>{if(document.hidden)return;current+=(target-current)*.065;if(shoe){const p=reduced.matches?1:current;shoe.rotation.set(.12+Math.sin(p*Math.PI)*.14,-.65+p*1.35,-.28+p*.32);shoe.position.y=Math.sin(p*Math.PI)*.08;materials.forEach(m=>{if(m.userData.shader)m.userData.shader.uniforms.clean.value=p*1.3-.15;});}renderer.render(scene,camera);});
+renderer.setAnimationLoop(()=>{if(document.hidden)return;current=Math.abs(target-current)<.0005?target:current+(target-current)*.065;if(shoe){const p=reduced.matches?1:current;shoe.rotation.set(.12+Math.sin(p*Math.PI)*.14,-.65+p*1.35,-.28+p*.32);shoe.position.y=Math.sin(p*Math.PI)*.08;materials.forEach(m=>{if(m.userData.shader)m.userData.shader.uniforms.clean.value=THREE.MathUtils.clamp(p,0,1);});}renderer.render(scene,camera);});
 }catch{loading.textContent='La vista 3D no está disponible en este navegador. Puedes explorar nuestros servicios abajo.';}
