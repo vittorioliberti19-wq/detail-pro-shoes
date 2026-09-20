@@ -67,3 +67,8 @@ header .nav-cta:hover{color:#fff}
 .button{gap:0;width:fit-content}
 .hero-copy .button{display:flex}
 .hero-brand{display:flex;width:fit-content}
+/* Marca de productos mas visible y boton de WhatsApp mas arriba. */
+.hero-brand img{width:72px;height:72px;padding:8px}
+.hero-brand span{font-size:10px}
+.whatsapp-float{bottom:30%}
+@media(max-width:700px){.hero-brand img{width:58px;height:58px;padding:7px}.whatsapp-float{bottom:30%}}
