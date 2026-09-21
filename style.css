@@ -72,3 +72,7 @@ header .nav-cta:hover{color:#fff}
 .hero-brand span{font-size:10px}
 .whatsapp-float{bottom:30%}
 @media(max-width:700px){.hero-brand img{width:58px;height:58px;padding:7px}.whatsapp-float{bottom:20%}}
+/* El zapato pasa delante del titular; el texto de apoyo y los botones siguen por encima. */
+.hero-title{z-index:1}
+#shoe-stage{z-index:2}
+.hero-copy,.model-tag{z-index:3}
