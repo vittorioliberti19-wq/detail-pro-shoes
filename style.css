@@ -71,4 +71,4 @@ header .nav-cta:hover{color:#fff}
 .hero-brand img{width:72px;height:72px;padding:8px}
 .hero-brand span{font-size:10px}
 .whatsapp-float{bottom:30%}
-@media(max-width:700px){.hero-brand img{width:58px;height:58px;padding:7px}.whatsapp-float{bottom:30%}}
+@media(max-width:700px){.hero-brand img{width:58px;height:58px;padding:7px}.whatsapp-float{bottom:20%}}
